@@ -4,3 +4,10 @@ out
 
 # Java
 *.class
+
+# Gradle
+.gradle
+build
+
+# vim
+*.swp
