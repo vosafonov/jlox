@@ -44,7 +44,9 @@ class Scanner {
             case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break;
             case '/':
                 if (match('/')) {
-                    while (peek() != '\n' && !isAtEnd()) advance();
+                    skipComment();
+                } else if (match('*')) {
+                    skipMultilineComment();
                 } else {
                     addToken(SLASH);
                 }
@@ -131,6 +133,31 @@ class Scanner {
         }
 
         addToken(type);
+    }
+
+    private void skipComment()
+    {
+        while (peek() != '\n' && !isAtEnd()) {
+            advance();
+        }
+    }
+
+    private void skipMultilineComment()
+    {
+        while ((peek() != '*' || peekNext() != '/') && !isAtEnd()) {
+            if (peek() == '\n') {
+                ++line;
+            }
+            advance();
+        }
+
+        if (isAtEnd()) {
+            Lox.error(line, "Unterminated comment.");
+        } else {
+            // пропускаем поселовательность '*/'
+            advance();
+            advance();
+        }
     }
 
     private boolean match(char expected)
