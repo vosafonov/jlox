@@ -63,6 +63,10 @@ class Scanner {
                 break;
 
             default:
+                if (isDigit(c)) {
+                    number();
+                }
+
                 Lox.error(line, "Unexpected character.");
                 break;
         }
@@ -83,11 +87,30 @@ class Scanner {
             return;
         }
 
-        // закрывающая '"'
+        // пропускаем закрывающую '"'
         advance();
 
         String value = source.substring(start + 1, current - 1);
         addToken(STRING, value);
+    }
+
+    private void number()
+    {
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        if (peek() == '.' && isDigit(peekNext())) {
+            // пропускаем '.'
+            advance();
+
+            while (isDigit(peek())) {
+                advance();
+            }
+        }
+
+        Double value = Double.parseDouble(source.substring(start, current));
+        addToken(NUMBER, value);
     }
 
     private boolean match(char expected)
@@ -109,6 +132,19 @@ class Scanner {
             return '\0';
         }
         return source.charAt(current);
+    }
+
+    private char peekNext()
+    {
+        if (current + 1 >= source.length()) {
+            return '\0';
+        }
+        return source.charAt(current);
+    }
+
+    private boolean isDigit(char c)
+    {
+        return c >= '0' && c <= '9';
     }
 
     private boolean isAtEnd()
