@@ -58,10 +58,36 @@ class Scanner {
                 ++line;
                 break;
 
+            case '"':
+                string();
+                break;
+
             default:
                 Lox.error(line, "Unexpected character.");
                 break;
         }
+    }
+
+    private void string()
+    {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') {
+                ++line;
+            }
+            advance();
+        }
+
+        // отсутствует закрывающая '"'
+        if (isAtEnd()) {
+            Lox.error(line, "Unterminated string.");
+            return;
+        }
+
+        // закрывающая '"'
+        advance();
+
+        String value = source.substring(start + 1, current - 1);
+        addToken(STRING, value);
     }
 
     private boolean match(char expected)
