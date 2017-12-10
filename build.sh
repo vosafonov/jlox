@@ -2,7 +2,7 @@
 
 echo "--------------------------"
 echo "building..."
-gradle jar
+gradle jar generateAstJar
 echo "done."
 
 echo "--------------------------"

@@ -4,15 +4,37 @@ apply plugin: 'application'
 sourceSets {
     main {
         java {
-            srcDir 'src/com/lox'
+            srcDir 'src'
         }
     }
 }
 
 jar {
+    baseName 'jlox'
+    from(sourceSets.main.output) {
+        include 'com/lox/**'
+    }
     manifest {
         attributes(
             'Main-Class': 'com.lox.Lox'
         )
     }
+}
+
+task generateAstJar(type: Jar) {
+    baseName 'generate_ast'
+    from(sourceSets.main.output) {
+        include 'com/tool/**'
+    }
+    manifest {
+        attributes(
+            'Main-Class': 'com.tool.GenerateAst'
+        )
+    }
+}
+assemble.dependsOn(generateAstJar)
+
+artifacts {
+    archives jar
+    archives generateAstJar
 }
