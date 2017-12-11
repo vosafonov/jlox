@@ -33,14 +33,35 @@ public class GenerateAst {
         writer.println("import java.util.List;");
         writer.println("");
         writer.println("abstract class " + baseName + " {");
+
+        defineVisitor(writer, baseName, types);
+
+        // AST классы
         for (String type : types) {
             String[] parts = type.split(":");
             String className = parts[0].trim();
             String fields = parts[1].trim();
             defineType(writer, baseName, className, fields);
         }
+
+        // accept() метод
+        writer.println("");
+        writer.println("    abstract <R> R accept(Visitor<R> visitor);");
+
         writer.println("}");
         writer.close();
+    }
+
+    private static void defineVisitor(PrintWriter writer, String baseName, List<String> types)
+    {
+        writer.println("    interface Visitor<R> {");
+        for (String type : types) {
+            String typeName = type.split(":")[0].trim();
+            String methodName = "visit" + typeName + baseName;
+            String arg = typeName + " " + baseName.toLowerCase();
+            writer.println("        R " + methodName + "(" + arg + ");");
+        }
+        writer.println("    }");
     }
 
     private static void defineType(PrintWriter writer, String baseName, String className, String fieldList)
@@ -64,6 +85,12 @@ public class GenerateAst {
         for (String field : fields) {
             writer.println("        final " + field + ";");
         }
+
+        // Реализация метода accept()
+        writer.println("");
+        writer.println("        <R> R accept(Visitor <R> visitor) {");
+        writer.println("            return visitor.visit" + className + baseName + "(this);");
+        writer.println("        }");
 
         writer.println("    }");
     }
