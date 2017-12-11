@@ -23,17 +23,48 @@ public class GenerateAst {
         defineAst(outputDir, "Expr", types);
     }
 
-    private static void defineAst(String outputDir, String basename, List<String> types) throws IOException
+    private static void defineAst(String outputDir, String baseName, List<String> types) throws IOException
     {
-        String path = outputDir + "/" + basename + ".java";
+        String path = outputDir + "/" + baseName + ".java";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
         writer.println("package com.lox;");
         writer.println("");
-        writer.println("import java.utils.List;");
+        writer.println("import java.util.List;");
         writer.println("");
-        writer.println("abstract class " + basename + " {");
+        writer.println("abstract class " + baseName + " {");
+        for (String type : types) {
+            String[] parts = type.split(":");
+            String className = parts[0].trim();
+            String fields = parts[1].trim();
+            defineType(writer, baseName, className, fields);
+        }
         writer.println("}");
         writer.close();
+    }
+
+    private static void defineType(PrintWriter writer, String baseName, String className, String fieldList)
+    {
+        writer.println("");
+        writer.println("    static class " + className + " extends " + baseName + " {");
+
+        // Конструктор (start)
+        writer.println("        " + className + "(" + fieldList + ") {");
+        // Инициализация полей
+        String[] fields = fieldList.split(", ");
+        for (String field : fields) {
+            String name = field.split(" ")[1];
+            writer.println("            this." + name + " = " + name + ";");
+        }
+        // Конструктор (end)
+        writer.println("        }");
+
+        // Поля
+        writer.println("");
+        for (String field : fields) {
+            writer.println("        final " + field + ";");
+        }
+
+        writer.println("    }");
     }
 }
