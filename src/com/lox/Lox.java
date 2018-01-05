@@ -25,6 +25,7 @@ public class Lox {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
         if (hadError) System.exit(65);
+        if (hadRuntimeError) System.exit(70);
     }
 
     private static void runPrompt() throws IOException
@@ -49,7 +50,14 @@ public class Lox {
         if (hadError) {
             return;
         }
+
+        System.out.println();
+        System.out.println("-----AstPrinter-----");
         System.out.println(new AstPrinter().print(expression));
+
+        System.out.println();
+        System.out.println("-----Interpreter----");
+        interpreter.interpret(expression);
     }
 
     static void error(int line, String message)
@@ -66,12 +74,20 @@ public class Lox {
         }
     }
 
+    static void runtimeError(RuntimeError error)
+    {
+        System.err.println("[line " + error.token.line + "] " + error.getMessage());
+        hadRuntimeError = true;
+    }
+
     private static void report(int line, String where, String message)
     {
         System.err.println("[line " + line + "] Error" + where + ": " + message);
         hadError = true;
     }
 
+    private static final Interpreter interpreter = new Interpreter();
     private static boolean hadError = false;
+    private static boolean hadRuntimeError = false;
 }
 
