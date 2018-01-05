@@ -1,5 +1,9 @@
 package com.lox;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class AstPrinter implements Expr.Visitor<String> {
     String print(Expr expr)
     {
@@ -15,7 +19,7 @@ public class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitGroupingExpr(Expr.Grouping expr)
     {
-        return parenthesize("group", expr.expression);
+        return parenthesize("group", expr.expressions);
     }
 
     @Override
@@ -33,7 +37,7 @@ public class AstPrinter implements Expr.Visitor<String> {
         return parenthesize(expr.operator.lexeme, expr.right);
     }
 
-    private String parenthesize(String name, Expr... exprs)
+    private String parenthesize(String name, List<Expr> exprs)
     {
         StringBuilder builder = new StringBuilder();
 
@@ -45,5 +49,12 @@ public class AstPrinter implements Expr.Visitor<String> {
         builder.append(")");
 
         return builder.toString();
+    }
+
+    private String parenthesize(String name, Expr... exprs)
+    {
+        List<Expr> args = new ArrayList<>();
+        Collections.addAll(args, exprs);
+        return parenthesize(name, args);
     }
 }

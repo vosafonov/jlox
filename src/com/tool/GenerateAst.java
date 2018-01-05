@@ -16,7 +16,7 @@ public class GenerateAst {
         String outputDir = args[0];
         List<String> types = Arrays.asList(
             "Binary     : Expr left, Token operator, Expr right",
-            "Grouping   : Expr expression",
+            "Grouping   : List<Expr> expressions",
             "Literal    : Object value",
             "Unary      : Token operator, Expr right"
         );

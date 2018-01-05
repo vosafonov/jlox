@@ -27,11 +27,11 @@ abstract class Expr {
     }
 
     static class Grouping extends Expr {
-        Grouping(Expr expression) {
-            this.expression = expression;
+        Grouping(List<Expr> expressions) {
+            this.expressions = expressions;
         }
 
-        final Expr expression;
+        final List<Expr> expressions;
 
         <R> R accept(Visitor <R> visitor) {
             return visitor.visitGroupingExpr(this);

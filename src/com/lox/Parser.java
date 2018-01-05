@@ -1,5 +1,6 @@
 package com.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 import static com.lox.TokenType.*;
 
@@ -12,7 +13,7 @@ import static com.lox.TokenType.*;
 // unary          → ( "!" | "-" ) unary
 //                | primary ;
 // primary        → NUMBER | STRING | "false" | "true" | "nil"
-//                | "(" expression ")" ;
+//                | "(" expression ("," expression)* ")" ;
 //
 class Parser {
     private static class ParseError extends RuntimeException {
@@ -119,10 +120,16 @@ class Parser {
             return new Expr.Literal(previous().literal);
         }
 
+        List<Expr> exprs = new ArrayList<>();
         if (matchAny(LEFT_PAREN)) {
-            Expr expr = expression();
+            exprs.add(expression());
+
+            while (matchAny(COMMA)) {
+                exprs.add(expression());
+            }
             consume(RIGHT_PAREN, "Expect ')' after expression.");
-            return new Expr.Grouping(expr);
+
+            return new Expr.Grouping(exprs);
         }
 
         throw error(peek(), "Expect expression.");
