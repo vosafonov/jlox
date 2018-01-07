@@ -21,6 +21,12 @@ public class GenerateAst {
             "Unary      : Token operator, Expr right"
         );
         defineAst(outputDir, "Expr", types);
+
+        types = Arrays.asList(
+            "Expression : Expr expression",
+            "Print      : Expr expression"
+        );
+        defineAst(outputDir, "Stmt", types);
     }
 
     private static void defineAst(String outputDir, String baseName, List<String> types) throws IOException

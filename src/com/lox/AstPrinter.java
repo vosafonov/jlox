@@ -4,7 +4,37 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AstPrinter implements Expr.Visitor<String> {
+public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
+    //
+    // Stmt.Visitor
+    //
+    String print(List<Stmt> statements)
+    {
+        StringBuilder builder = new StringBuilder();
+
+        for (Stmt statement : statements) {
+            builder.append(statement.accept(this));
+            builder.append('\n');
+        }
+
+        return builder.toString();
+    }
+
+    @Override
+    public String visitExpressionStmt(Stmt.Expression stmt)
+    {
+        return parenthesize("stmt_expr", stmt.expression);
+    }
+
+    @Override
+    public String visitPrintStmt(Stmt.Print stmt)
+    {
+        return parenthesize("stmt_print", stmt.expression);
+    }
+
+    //
+    // Expr.Visitor
+    //
     String print(Expr expr)
     {
         return expr.accept(this);

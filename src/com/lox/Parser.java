@@ -5,6 +5,14 @@ import java.util.List;
 import static com.lox.TokenType.*;
 
 //
+// program   → statement* EOF ;
+//
+// statement → exprStmt
+//           | printStmt ;
+//
+// exprStmt  → expression ";" ;
+// printStmt → "print" expression ";" ;
+//
 // expression     → equality ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
@@ -27,10 +35,14 @@ class Parser {
         this.tokens = tokens;
     }
 
-    Expr parse()
+    List<Stmt> parse()
     {
         try {
-            return expression();
+            List<Stmt> statements = new ArrayList<>();
+            while (!isAtEnd()) {
+                statements.add(statement());
+            }
+            return statements;
         } catch (ParseError error) {
             return null;
         }
@@ -39,6 +51,29 @@ class Parser {
     private Expr expression()
     {
         return equlity();
+    }
+
+    private Stmt statement()
+    {
+        if (matchAny(PRINT)) {
+            return printStatement();
+        }
+
+        return expressionStatement();
+    }
+
+    private Stmt printStatement()
+    {
+        Expr value = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+
+    private Stmt expressionStatement()
+    {
+        Expr expr = expression();
+        consume(SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
     }
 
     private Expr equlity()
