@@ -21,6 +21,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitBlockStmt(Stmt.Block stmt)
+    {
+        return parenthesizeStmts("block", stmt.statements);
+    }
+
+    @Override
     public String visitExpressionStmt(Stmt.Expression stmt)
     {
         return parenthesize("stmt_expr", stmt.expression);
@@ -85,6 +91,7 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
         return parenthesize("variable '" + expr.name.lexeme + "'");
     }
 
+    // TODO: упростить методы parenthesize
     private String parenthesize(String name, List<Expr> exprs)
     {
         StringBuilder builder = new StringBuilder();
@@ -104,5 +111,19 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
         List<Expr> args = new ArrayList<>();
         Collections.addAll(args, exprs);
         return parenthesize(name, args);
+    }
+
+    private String parenthesizeStmts(String name, List<Stmt> stmts)
+    {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("(").append(name);
+        for (Stmt stmt : stmts) {
+            builder.append(" ");
+            builder.append(stmt.accept(this));
+        }
+        builder.append(")");
+
+        return builder.toString();
     }
 }
