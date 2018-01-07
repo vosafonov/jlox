@@ -5,7 +5,11 @@ import java.util.List;
 import static com.lox.TokenType.*;
 
 //
-// program   → statement* EOF ;
+// program     → declaration* eof ;
+//
+// declaration → varDecl
+//             | statement ;
+// varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 //
 // statement → exprStmt
 //           | printStmt ;
@@ -21,7 +25,8 @@ import static com.lox.TokenType.*;
 // unary          → ( "!" | "-" ) unary
 //                | primary ;
 // primary        → NUMBER | STRING | "false" | "true" | "nil"
-//                | "(" expression ("," expression)* ")" ;
+//                | "(" expression ( "," expression)* ")"
+//                | IDENTIFIER ;
 //
 class Parser {
     private static class ParseError extends RuntimeException {
@@ -37,20 +42,36 @@ class Parser {
 
     List<Stmt> parse()
     {
-        try {
-            List<Stmt> statements = new ArrayList<>();
-            while (!isAtEnd()) {
-                statements.add(statement());
+        List<Stmt> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            try {
+                statements.add(declaration());
+            } catch (ParseError error) {
+                synchronize();
             }
-            return statements;
-        } catch (ParseError error) {
-            return null;
         }
+        return statements;
     }
 
-    private Expr expression()
+    private Stmt declaration()
     {
-        return equlity();
+        if (matchAny(VAR)) {
+            return varDeclaration();
+        }
+        return statement();
+    }
+
+    private Stmt varDeclaration()
+    {
+        Token name = consume(IDENTIFIER, "Expect variable name.");
+
+        Expr initializer = null;
+        if (matchAny(EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
     }
 
     private Stmt statement()
@@ -74,6 +95,11 @@ class Parser {
         Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    private Expr expression()
+    {
+        return equlity();
     }
 
     private Expr equlity()
@@ -155,6 +181,10 @@ class Parser {
             return new Expr.Literal(previous().literal);
         }
 
+        if (matchAny(IDENTIFIER)) {
+            return new Expr.Variable(previous());
+        }
+
         List<Expr> exprs = new ArrayList<>();
         if (matchAny(LEFT_PAREN)) {
             exprs.add(expression());
@@ -224,5 +254,29 @@ class Parser {
     {
         Lox.error(token, message);
         return new ParseError();
+    }
+
+    private void synchronize() {
+        advance();
+
+        while (!isAtEnd()) {
+            if (previous().type == SEMICOLON) {
+                return;
+            }
+
+            switch (peek().type) {
+                case CLASS:
+                case FUN:
+                case VAR:
+                case FOR:
+                case IF:
+                case WHILE:
+                case PRINT:
+                case RETURN:
+                    return;
+            }
+
+            advance();
+        }
     }
 }
