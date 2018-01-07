@@ -21,14 +21,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitExpressionStmt(Stmt.Expression stmt)
     {
-        evulation(stmt.expression);
+        evaluate(stmt.expression);
         return null;
     }
 
     @Override
     public Void visitPrintStmt(Stmt.Print stmt)
     {
-        Object value = evulation(stmt.expression);
+        Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
         return null;
     }
@@ -62,8 +62,8 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitBinaryExpr(Expr.Binary expr)
     {
-        Object left = evulation(expr.left);
-        Object right = evulation(expr.right);
+        Object left = evaluate(expr.left);
+        Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
             case BANG_EQUAL:
@@ -124,7 +124,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitGroupingExpr(Expr.Grouping expr)
     {
-        return evulation(expr.expressions);
+        return evaluate(expr.expressions);
     }
 
     @Override
@@ -136,7 +136,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitUnaryExpr(Expr.Unary expr)
     {
-        Object right = evulation(expr.right);
+        Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
             case BANG:
@@ -178,7 +178,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return true;
     }
 
-    private Object evulation(List<Expr> exprs)
+    private Object evaluate(List<Expr> exprs)
     {
         Object lastResult = null;
 
@@ -189,7 +189,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return lastResult;
     }
 
-    private Object evulation(Expr expr)
+    private Object evaluate(Expr expr)
     {
         return expr.accept(this);
     }
