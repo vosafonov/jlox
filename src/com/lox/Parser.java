@@ -17,7 +17,12 @@ import static com.lox.TokenType.*;
 // exprStmt  → expression ";" ;
 // printStmt → "print" expression ";" ;
 //
-// expression     → equality ;
+// expression     → assignment ;
+//
+//                на самом деле 'identifier' парсится как 'equality',
+//                но с дополнительной проверкой
+// assignment     → identifier "=" assignment
+//                | equality ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 // addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
@@ -99,7 +104,27 @@ class Parser {
 
     private Expr expression()
     {
-        return equlity();
+        return assignment();
+    }
+
+    private Expr assignment()
+    {
+        Expr expr = equlity();
+
+        if (matchAny(EQUAL)) {
+            Token equals = previous();
+            Expr value = assignment();
+
+            if (expr instanceof Expr.Variable) {
+                Expr.Variable varExpr = (Expr.Variable)expr;
+                Token name = varExpr.name;
+                return new Expr.Assign(name, value);
+            }
+
+            throw error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     private Expr equlity()

@@ -47,6 +47,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitAssignExpr(Expr.Assign expr)
+    {
+        return parenthesize("assign '" + expr.name.lexeme + "'", expr.value);
+    }
+
+    @Override
     public String visitBinaryExpr(Expr.Binary expr)
     {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right);
