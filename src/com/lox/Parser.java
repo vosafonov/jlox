@@ -12,10 +12,12 @@ import static com.lox.TokenType.*;
 // varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 //
 // statement → exprStmt
+//           | ifStmt
 //           | printStmt
 //           | block ;
 //
 // exprStmt  → expression ";" ;
+// ifStmt    → "if" "(" expression ")" statement ( "else" statement )? ;
 // printStmt → "print" expression ";" ;
 // block     →  "{" declaration* "}"
 //
@@ -83,6 +85,9 @@ class Parser {
 
     private Stmt statement()
     {
+        if (matchAny(IF)) {
+            return ifStatement();
+        }
         if (matchAny(PRINT)) {
             return printStatement();
         }
@@ -91,6 +96,21 @@ class Parser {
         }
 
         return expressionStatement();
+    }
+
+    private Stmt ifStatement()
+    {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after 'if' condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (matchAny(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private Stmt printStatement()

@@ -33,6 +33,16 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitIfStmt(Stmt.If stmt)
+    {
+        String condition = parenthesize("condition", stmt.condition);
+        String thenBranch = parenthesizeStmts("then", stmt.thenBranch);
+        String elseBranch = parenthesizeStmts("else", stmt.elseBranch);
+
+        return parenthesizeStmts("stmt_if " + condition + " " + thenBranch + " " + elseBranch);
+    }
+
+    @Override
     public String visitPrintStmt(Stmt.Print stmt)
     {
         return parenthesize("stmt_print", stmt.expression);
@@ -125,5 +135,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
         builder.append(")");
 
         return builder.toString();
+    }
+
+    private String parenthesizeStmts(String name, Stmt... stmts)
+    {
+        List<Stmt> args = new ArrayList<>();
+        Collections.addAll(args, stmts);
+        return parenthesizeStmts(name, args);
     }
 }
