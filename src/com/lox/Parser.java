@@ -26,7 +26,9 @@ import static com.lox.TokenType.*;
 //                на самом деле 'identifier' парсится как 'equality',
 //                но с дополнительной проверкой
 // assignment     → identifier "=" assignment
-//                | equality ;
+//                | logic_or ;
+// logic_or       → logic_and ( "or" logic_and )* ;
+// logic_and      → equality ( "and" equality )* ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 // addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
@@ -146,7 +148,7 @@ class Parser {
 
     private Expr assignment()
     {
-        Expr expr = equlity();
+        Expr expr = logic_or();
 
         if (matchAny(EQUAL)) {
             Token equals = previous();
@@ -159,6 +161,32 @@ class Parser {
             }
 
             throw error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private Expr logic_or()
+    {
+        Expr expr = logic_and();
+
+        while (matchAny(OR)) {
+            Token operator = previous();
+            Expr right = logic_and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr logic_and()
+    {
+        Expr expr = equlity();
+
+        while (matchAny(AND)) {
+            Token operator = previous();
+            Expr right = equlity();
+            expr = new Expr.Logical(expr, operator, right);
         }
 
         return expr;
