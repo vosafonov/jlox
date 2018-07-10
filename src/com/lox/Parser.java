@@ -8,8 +8,12 @@ import static com.lox.TokenType.*;
 //
 // program     → declaration* eof ;
 //
-// declaration → varDecl
+// declaration → funDecl
+//             | varDecl
 //             | statement ;
+// funDecl → "fun" function ;
+// function → IDENTIFIER "(" parameters? ")" block ;
+// parameters → IDENTIFIER ( "," IDENTIFIER )* ;
 // varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 //
 // statement → exprStmt
@@ -42,10 +46,12 @@ import static com.lox.TokenType.*;
 // addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
 // multiplication → unary ( ( "/" | "*" ) unary )* ;
 // unary          → ( "!" | "-" ) unary
-//                | primary ;
+//                | call ;
 // primary        → NUMBER | STRING | "false" | "true" | "nil"
 //                | "(" expression ( "," expression)* ")"
 //                | IDENTIFIER ;
+// call           → primary ( "(" arguments? ")" )* ;
+// arguments      → expression ( "," expression )* ;
 //
 class Parser {
     private static class ParseError extends RuntimeException {
@@ -74,6 +80,9 @@ class Parser {
 
     private Stmt declaration()
     {
+        if (matchAny(FUN)) {
+            return function("function");
+        }
         if (matchAny(VAR)) {
             return varDeclaration();
         }
@@ -210,6 +219,27 @@ class Parser {
         return new Stmt.Expression(expr);
     }
 
+    private Stmt.Function function(String kind)
+    {
+        Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 8 ) {
+                    error(peek(), "Cannot have more than 8 parameters.");
+                }
+
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while (matchAny(COMMA));
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block();
+        return new Stmt.Function(name, parameters, body);
+    }
+
     private Expr expression()
     {
         return assignment();
@@ -321,7 +351,35 @@ class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    private Expr call()
+    {
+        Expr expr = primary();
+
+        while (matchAny(LEFT_PAREN)) {
+            expr = finishCall(expr);
+        }
+
+        return expr;
+    }
+
+    private Expr finishCall(Expr callee)
+    {
+        List<Expr> arguments = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= 8) {
+                    error(peek(), "Cannot have more than 8 arguments.");
+                }
+                arguments.add(expression());
+            } while (matchAny(COMMA));
+        }
+
+        Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
     }
 
     private Expr primary()

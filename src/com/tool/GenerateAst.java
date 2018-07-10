@@ -17,6 +17,7 @@ public class GenerateAst {
         List<String> types = Arrays.asList(
             "Assign     : Token name, Expr value",
             "Binary     : Expr left, Token operator, Expr right",
+            "Call       : Expr callee, Token paren, List<Expr> arguments",
             "Grouping   : List<Expr> expressions",
             "Literal    : Object value",
             "Logical    : Expr left, Token operator, Expr right",
@@ -28,6 +29,7 @@ public class GenerateAst {
         types = Arrays.asList(
             "Block      : List<Stmt> statements",
             "Expression : Expr expression",
+            "Function   : Token name, List<Token> parameters, List<Stmt> body",
             "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
             "Print      : Expr expression",
             "Var        : Token name, Expr initializer",

@@ -33,6 +33,13 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitFunctionStmt(Stmt.Function stmt)
+    {
+        String header = "function def '" + stmt.name.lexeme + "' with params " + parenthesize(stmt.parameters) + " and body";
+        return parenthesizeStmts(header, stmt.body);
+    }
+
+    @Override
     public String visitIfStmt(Stmt.If stmt)
     {
         String condition = parenthesize("condition", stmt.condition);
@@ -84,6 +91,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitCallExpr(Expr.Call expr)
+    {
+        return parenthesize("call " + expr.callee.accept(this) + " with ", expr.arguments);
+    }
+
+    @Override
     public String visitGroupingExpr(Expr.Grouping expr)
     {
         return parenthesize("group", expr.expressions);
@@ -117,6 +130,23 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     // TODO: упростить методы parenthesize
+    private String parenthesize(List<Token> tokens)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        boolean first = true;
+        for (Token token : tokens) {
+            if (!first) {
+                builder.append(" ");
+            }
+            first = false;
+            builder.append(token.lexeme);
+        }
+        builder.append(")");
+
+        return builder.toString();
+    }
+
     private String parenthesize(String name, List<Expr> exprs)
     {
         StringBuilder builder = new StringBuilder();
