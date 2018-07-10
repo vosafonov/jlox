@@ -20,6 +20,7 @@ import static com.lox.TokenType.*;
 //           | forStmt
 //           | ifStmt
 //           | printStmt
+//           | returnStmt
 //           | whileStmt
 //           | block ;
 //
@@ -28,10 +29,11 @@ import static com.lox.TokenType.*;
 //                       expression? ";"
 //                       expression? ")" statement ;
 //
-// ifStmt    → "if" "(" expression ")" statement ( "else" statement )? ;
-// printStmt → "print" expression ";" ;
-// whileStmt → "while" "(" expression ")" statement ;
-// block     →  "{" declaration* "}"
+// ifStmt     → "if" "(" expression ")" statement ( "else" statement )? ;
+// printStmt  → "print" expression ";" ;
+// returnStmt → "return" expression? ";" ;
+// whileStmt  → "while" "(" expression ")" statement ;
+// block      →  "{" declaration* "}"
 //
 // expression     → assignment ;
 //
@@ -113,6 +115,9 @@ class Parser {
         if (matchAny(PRINT)) {
             return printStatement();
         }
+        if (matchAny(RETURN)) {
+            return returnStatement();
+        }
         if (matchAny(WHILE)) {
             return whileStatement();
         }
@@ -188,6 +193,18 @@ class Parser {
         Expr value = expression();
         consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
+    }
+
+    private Stmt returnStatement()
+    {
+        Token keyword = previous();
+        Expr value = null;
+        if (!check(SEMICOLON)) {
+            value = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after return value.");
+        return new Stmt.Return(keyword, value);
     }
 
     private Stmt whileStatement()

@@ -44,7 +44,10 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     {
         String condition = parenthesize("condition", stmt.condition);
         String thenBranch = parenthesizeStmts("then", stmt.thenBranch);
-        String elseBranch = parenthesizeStmts("else", stmt.elseBranch);
+        String elseBranch = "";
+        if (stmt.elseBranch != null) {
+            elseBranch = parenthesizeStmts("else", stmt.elseBranch);
+        }
 
         return parenthesizeStmts("stmt_if " + condition + " " + thenBranch + " " + elseBranch);
     }
@@ -53,6 +56,16 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     public String visitPrintStmt(Stmt.Print stmt)
     {
         return parenthesize("stmt_print", stmt.expression);
+    }
+
+    @Override
+    public String visitReturnStmt(Stmt.Return stmt)
+    {
+        if (stmt.value != null) {
+            return parenthesize("stmt_return", stmt.value);
+        } else {
+            return "stmt_return";
+        }
     }
 
     @Override
