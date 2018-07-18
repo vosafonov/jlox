@@ -57,6 +57,8 @@ public class Lox {
 
         System.out.println();
         System.out.println("-----Interpreter----");
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
         interpreter.interpret(statements);
     }
 

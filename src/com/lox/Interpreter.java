@@ -1,7 +1,9 @@
 package com.lox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     Interpreter()
@@ -119,6 +121,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         stmt.accept(this);
     }
 
+    void resolve(Expr expr, int depth)
+    {
+        locals.put(expr, depth);
+    }
+
     void executeBlock(List<Stmt> statements, Environment environment)
     {
         Environment previous = this.environment;
@@ -159,7 +166,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     {
         Object value = evaluate(expr.value);
 
-        environment.assign(expr.name, value);
+        Integer depth = locals.get(expr);
+        if (depth != null) {
+            environment.assignAt(depth, expr.name, value);
+        } else {
+            globals.assign(expr.name, value);
+        }
+
         return value;
     }
 
@@ -294,7 +307,17 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitVariableExpr(Expr.Variable expr)
     {
-        return environment.get(expr.name);
+        return lookUpVariable(expr.name, expr);
+    }
+
+    private Object lookUpVariable(Token name, Expr expr)
+    {
+        Integer depth = locals.get(expr);
+        if (depth != null) {
+            return environment.getAt(depth, name);
+        } else {
+            return globals.get(name);
+        }
     }
 
     private void ensureNumberOperand(Token operator, Object operand)
@@ -344,4 +367,5 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     final Environment globals = new Environment();
     private Environment environment = globals;
+    private final Map<Expr, Integer> locals = new HashMap<>();
 }

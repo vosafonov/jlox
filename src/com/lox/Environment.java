@@ -19,6 +19,17 @@ public class Environment {
         values.put(name, value);
     }
 
+    private Environment ancestor(int depth)
+    {
+        Environment env = this;
+        for (int i = 0; i < depth; ++i) {
+            assert env != null;
+            env = env.enclosing;
+        }
+
+        return env;
+    }
+
     void assign(Token name, Object value)
     {
         if (values.containsKey(name.lexeme)) {
@@ -34,6 +45,11 @@ public class Environment {
         throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
     }
 
+    void assignAt(int depth, Token name, Object value)
+    {
+        ancestor(depth).values.put(name.lexeme, value);
+    }
+
     Object get(Token name)
     {
         if (values.containsKey(name.lexeme)) {
@@ -45,6 +61,11 @@ public class Environment {
         }
 
         throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
+    }
+
+    Object getAt(int depth, Token name)
+    {
+        return ancestor(depth).values.get(name.lexeme);
     }
 
     private final Map<String, Object> values = new HashMap<>();
