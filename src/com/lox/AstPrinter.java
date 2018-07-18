@@ -27,6 +27,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitClassStmt(Stmt.Class stmt)
+    {
+        return parenthesizeFuncStmts("class def '" + stmt.name.lexeme + "' with functions", stmt.methods);
+    }
+
+    @Override
     public String visitExpressionStmt(Stmt.Expression stmt)
     {
         return parenthesize("stmt_expr", stmt.expression);
@@ -200,5 +206,26 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
         List<Stmt> args = new ArrayList<>();
         Collections.addAll(args, stmts);
         return parenthesizeStmts(name, args);
+    }
+
+    private String parenthesizeFuncStmts(String name, List<Stmt.Function> stmts)
+    {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("(").append(name);
+        for (Stmt stmt : stmts) {
+            builder.append(" ");
+            builder.append(stmt.accept(this));
+        }
+        builder.append(")");
+
+        return builder.toString();
+    }
+
+    private String parenthesizeFuncStmts(String name, Stmt.Function... stmts)
+    {
+        List<Stmt.Function> args = new ArrayList<>();
+        Collections.addAll(args, stmts);
+        return parenthesizeFuncStmts(name, args);
     }
 }
