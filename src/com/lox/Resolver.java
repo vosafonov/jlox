@@ -8,6 +8,7 @@ import java.util.Stack;
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private enum FunctionType {
         NONE,
+        METHOD,
         FUNCTION
     }
 
@@ -188,6 +189,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     {
         declare(stmt.name);
         define(stmt.name);
+
+        for (Stmt.Function method : stmt.methods) {
+            FunctionType type = FunctionType.METHOD;
+            resolveFunction(method, type);
+        }
+
         return null;
     }
 

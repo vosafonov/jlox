@@ -8,11 +8,23 @@ class Breakfast {
   }
 }
 
+print "--------------------";
+print "--------ctor--------";
+print "--------------------";
 print Breakfast;
 var v1 = Breakfast();
 print v1;
 
+print "--------------------";
+print "-------fields-------";
+print "--------------------";
 v1.left = "l";
 v1.right = "r";
 print v1.left;
 print v1.right;
+
+print "--------------------";
+print "------methods-------";
+print "--------------------";
+v1.cook();
+v1.serve("Vadim");
