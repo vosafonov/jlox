@@ -18,12 +18,13 @@ class LoxFunction implements LoxCallable {
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments)
     {
+        Environment env = new Environment(closure);
         for (int i = 0; i < declaration.parameters.size(); ++i) {
-            closure.define(declaration.parameters.get(i).lexeme, arguments.get(i));
+            env.define(declaration.parameters.get(i).lexeme, arguments.get(i));
         }
 
         try {
-            interpreter.executeBlock(declaration.body, closure);
+            interpreter.executeBlock(declaration.body, env);
         } catch (Return returnValue) {
             return returnValue.value;
         }
