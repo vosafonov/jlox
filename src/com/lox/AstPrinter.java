@@ -116,6 +116,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitGetExpr(Expr.Get expr)
+    {
+        return parenthesize("get property '" + expr.name.lexeme + "' from object ", expr.object);
+    }
+
+    @Override
     public String visitGroupingExpr(Expr.Grouping expr)
     {
         return parenthesize("group", expr.expressions);
@@ -134,6 +140,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     public String visitLogicalExpr(Expr.Logical expr)
     {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right);
+    }
+
+    @Override
+    public String visitSetExpr(Expr.Set expr) {
+        String obj = parenthesize("", expr.object);
+        return parenthesize("set property '" + expr.name.lexeme + "' from object " + obj + " to ", expr.value);
     }
 
     @Override

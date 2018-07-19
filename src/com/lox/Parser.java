@@ -39,9 +39,7 @@ import static com.lox.TokenType.*;
 //
 // expression     → assignment ;
 //
-//                на самом деле 'identifier' парсится как 'equality',
-//                но с дополнительной проверкой
-// assignment     → identifier "=" assignment
+// assignment     → ( call "." )? IDENTIFIER "=" assignment
 //                | logic_or ;
 // logic_or       → logic_and ( "or" logic_and )* ;
 // logic_and      → equality ( "and" equality )* ;
@@ -54,7 +52,7 @@ import static com.lox.TokenType.*;
 // primary        → NUMBER | STRING | "false" | "true" | "nil"
 //                | "(" expression ( "," expression)* ")"
 //                | IDENTIFIER ;
-// call           → primary ( "(" arguments? ")" )* ;
+// call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 // arguments      → expression ( "," expression )* ;
 //
 class Parser {
@@ -293,6 +291,9 @@ class Parser {
                 Expr.Variable varExpr = (Expr.Variable)expr;
                 Token name = varExpr.name;
                 return new Expr.Assign(name, value);
+            } else if (expr instanceof Expr.Get) {
+                Expr.Get get = (Expr.Get)expr;
+                return new Expr.Set(get.object, get.name, value);
             }
 
             throw error(equals, "Invalid assignment target.");
@@ -394,8 +395,15 @@ class Parser {
     {
         Expr expr = primary();
 
-        while (matchAny(LEFT_PAREN)) {
-            expr = finishCall(expr);
+        while (true) {
+            if (matchAny(LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else if (matchAny(DOT)) {
+                Token name = consume(IDENTIFIER, "Expect property after '.'.");
+                expr = new Expr.Get(expr, name);
+            } else {
+                break;
+            }
         }
 
         return expr;

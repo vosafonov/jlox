@@ -11,3 +11,8 @@ class Breakfast {
 print Breakfast;
 var v1 = Breakfast();
 print v1;
+
+v1.left = "l";
+v1.right = "r";
+print v1.left;
+print v1.right;
