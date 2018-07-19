@@ -9,3 +9,5 @@ class Breakfast {
 }
 
 print Breakfast;
+var v1 = Breakfast();
+print v1;
