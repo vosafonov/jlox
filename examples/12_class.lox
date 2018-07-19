@@ -6,6 +6,14 @@ class Breakfast {
   serve(who) {
     print "Enjoy your breakfast, " + who + ".";
   }
+
+  setDish(dish) {
+      this.dish = dish;
+  }
+
+  getDish() {
+      return this.dish;
+  }
 }
 
 print "--------------------";
@@ -28,3 +36,9 @@ print "------methods-------";
 print "--------------------";
 v1.cook();
 v1.serve("Vadim");
+
+print "--------------------";
+print "--------this--------";
+print "--------------------";
+v1.setDish("chicken");
+print "dish is " + v1.getDish();
