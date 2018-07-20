@@ -49,9 +49,9 @@ import static com.lox.TokenType.*;
 // multiplication → unary ( ( "/" | "*" ) unary )* ;
 // unary          → ( "!" | "-" ) unary
 //                | call ;
-// primary        → NUMBER | STRING | "false" | "true" | "nil"
-//                | "(" expression ( "," expression)* ")"
-//                | IDENTIFIER ;
+// primary        → "false" | "true" | "nil" | "this"
+//                | NUMBER | STRING | IDENTIFIER | "(" expression ( "," expression)* ")"
+//                | "super" "." IDENTIFIER ;
 // call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 // arguments      → expression ( "," expression )* ;
 //
@@ -448,6 +448,12 @@ class Parser {
             return new Expr.Literal(previous().literal);
         }
 
+        if (matchAny(SUPER)) {
+            Token keyword = previous();
+            consume(DOT, "Expect '.' after 'super'.");
+            Token method = consume(IDENTIFIER, "Expect superclass method name.");
+            return new Expr.Super(keyword, method);
+        }
         if (matchAny(THIS)) {
             return new Expr.This(previous());
         }

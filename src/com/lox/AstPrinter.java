@@ -150,6 +150,12 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitSuperExpr(Expr.Super expr)
+    {
+        return parenthesize("get 'super' method' " + expr.method.lexeme);
+    }
+
+    @Override
     public String visitThisExpr(Expr.This expr) {
         return "'this'";
     }

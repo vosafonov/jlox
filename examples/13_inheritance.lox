@@ -1,12 +1,19 @@
 class B {
     foo() {
+        print "B.foo";
+        return this;
+    }
+
+    boo() {
+        print "B.boo";
         return this;
     }
 }
 
 class D < B {
     boo() {
-        return this;
+        print "D.boo";
+        return super.boo();
     }
 }
 
