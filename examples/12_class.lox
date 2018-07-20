@@ -60,3 +60,17 @@ print p.y;
 
 print Point(6, 8).x;
 print Point(6, 8).y;
+
+print "--------------------";
+print "--return-from-ctor--";
+print "--------------------";
+class Test1 {
+    init(secret) {
+        if (secret != 42) {
+            return;
+        }
+        this.answer = 99;
+    }
+}
+
+print Test1(42).answer;

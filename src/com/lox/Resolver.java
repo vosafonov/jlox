@@ -7,14 +7,15 @@ import java.util.Stack;
 
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private enum FunctionType {
-        NONE,
+        FUNCTION,
+        INITIALIER,
         METHOD,
-        FUNCTION
+        NONE,
     }
 
     private enum ClassType {
+        CLASS,
         NONE,
-        CLASS
     }
 
     Resolver(Interpreter interpreter)
@@ -212,6 +213,9 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         scopes.peek().put("this", true);
         for (Stmt.Function method : stmt.methods) {
             FunctionType type = FunctionType.METHOD;
+            if (method.name.lexeme.equals("init")) {
+                type = FunctionType.INITIALIER;
+            }
             resolveFunction(method, type);
         }
         endScope();
@@ -262,6 +266,10 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
 
         if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIER) {
+                Lox.error(stmt.keyword, "Cannot return from an initializer.");
+            }
+
             resolve(stmt.value);
         }
         return null;
