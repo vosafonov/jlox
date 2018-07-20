@@ -8,13 +8,14 @@ import java.util.Stack;
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private enum FunctionType {
         FUNCTION,
-        INITIALIER,
         METHOD,
+        INITIALIZER,
         NONE,
     }
 
     private enum ClassType {
         CLASS,
+        SUBCLASS,
         NONE,
     }
 
@@ -165,6 +166,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitSuperExpr(Expr.Super expr) {
+        if (currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword, "Cannot use 'super' outside of a class.");
+        } else if (currentClass == ClassType.CLASS) {
+            Lox.error(expr.keyword, "Cannot use 'super' in a class with no superclass.");
+        }
+
         resolveLocal(expr, expr.keyword);
         return null;
     }
@@ -214,6 +221,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
         declare(stmt.name);
         if (stmt.superclass != null) {
+            currentClass = ClassType.SUBCLASS;
             resolve(stmt.superclass);
         }
         define(stmt.name);
@@ -228,7 +236,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         for (Stmt.Function method : stmt.methods) {
             FunctionType type = FunctionType.METHOD;
             if (method.name.lexeme.equals("init")) {
-                type = FunctionType.INITIALIER;
+                type = FunctionType.INITIALIZER;
             }
             resolveFunction(method, type);
         }
@@ -284,7 +292,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
 
         if (stmt.value != null) {
-            if (currentFunction == FunctionType.INITIALIER) {
+            if (currentFunction == FunctionType.INITIALIZER) {
                 Lox.error(stmt.keyword, "Cannot return from an initializer.");
             }
 
