@@ -29,7 +29,8 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     @Override
     public String visitClassStmt(Stmt.Class stmt)
     {
-        return parenthesizeFuncStmts("class def '" + stmt.name.lexeme + "' with functions", stmt.methods);
+        String derived = stmt.superclass != null ? " derived from '" + parenthesize("", stmt.superclass) + "'" : "";
+        return parenthesizeFuncStmts("class def '" + stmt.name.lexeme + "'" + derived + " with functions", stmt.methods);
     }
 
     @Override
