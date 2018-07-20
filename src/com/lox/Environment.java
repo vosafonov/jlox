@@ -65,7 +65,12 @@ public class Environment {
 
     Object getAt(int depth, Token name)
     {
-        return ancestor(depth).values.get(name.lexeme);
+        return getAt(depth, name.lexeme);
+    }
+
+    Object getAt(int depth, String name)
+    {
+        return ancestor(depth).values.get(name);
     }
 
     private final Map<String, Object> values = new HashMap<>();

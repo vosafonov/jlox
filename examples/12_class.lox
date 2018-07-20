@@ -42,3 +42,21 @@ print "--------this--------";
 print "--------------------";
 v1.setDish("chicken");
 print "dish is " + v1.getDish();
+
+print "--------------------";
+print "------user-ctor-----";
+print "--------------------";
+class Point {
+    init(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+var p = Point(4, 2);
+print p;
+print p.x;
+print p.y;
+
+print Point(6, 8).x;
+print Point(6, 8).y;
